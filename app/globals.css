@@ -1,0 +1,112 @@
+@import "tailwindcss";
+
+/* ─── Theme tokens ─────────────────────────────────────────────────────── */
+
+:root,
+[data-theme="notebook"] {
+  --bg: #f5f1e8;
+  --surface: #ffffff;
+  --text: #1a1a1a;
+  --muted: #666666;
+  --accent: #000000;
+}
+
+[data-theme="avocado"] {
+  --bg: #d4e3c0;
+  --surface: #e8efd9;
+  --text: #2d3a1f;
+  --muted: #5a6b46;
+  --accent: #3d5a2a;
+}
+
+[data-theme="sakura"] {
+  --bg: #fce4ec;
+  --surface: #fdeef3;
+  --text: #3a1f2e;
+  --muted: #7a4a60;
+  --accent: #d9869f;
+}
+
+[data-theme="blood-orange"] {
+  --bg: #ffb380;
+  --surface: #ffd9b3;
+  --text: #2a0f00;
+  --muted: #8a3a1a;
+  --accent: #c91540;
+}
+
+[data-theme="blue-bird"] {
+  --bg: #bcd4e6;
+  --surface: #d4e2ee;
+  --text: #3a2820;
+  --muted: #7a5a48;
+  --accent: #6e4030;
+}
+
+/* ─── Tailwind theme extensions ─────────────────────────────────────────── */
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-ink: var(--text);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
+  --font-display: var(--font-vt323), ui-monospace, monospace;
+  --font-ibm: var(--font-ibm-plex-mono), ui-monospace, monospace;
+  --font-geist: var(--font-geist-mono), ui-monospace, monospace;
+  --font-fira: var(--font-fira-code), ui-monospace, monospace;
+}
+
+/* ─── Base ───────────────────────────────────────────────────────────────── */
+
+html {
+  height: 100%;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+  min-height: 100%;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─── Semantic theme utilities ──────────────────────────────────────────── */
+
+@layer utilities {
+  .bg-theme {
+    background-color: var(--bg);
+  }
+  .bg-surface {
+    background-color: var(--surface);
+  }
+  .text-ink {
+    color: var(--text);
+  }
+  .text-muted {
+    color: var(--muted);
+  }
+  .text-accent {
+    color: var(--accent);
+  }
+  .border-accent {
+    border-color: var(--accent);
+  }
+  .border-muted {
+    border-color: var(--muted);
+  }
+  .ring-accent {
+    --tw-ring-color: var(--accent);
+  }
+  .divide-muted > * + * {
+    border-color: var(--muted);
+  }
+  .font-display {
+    font-family: var(--font-vt323), ui-monospace, monospace;
+  }
+  .font-mono-app {
+    font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+  }
+}
