@@ -720,9 +720,9 @@ Build incrementally. Each phase should be runnable / testable before moving to t
 
 ### Phase 4: Palette & Library
 - [x] Component palette sidebar
-- [ ] Drag from palette to canvas
+- [x] Drag from palette to canvas
 - [x] 28 built-in graphics, library picker
-- [ ] Property inspector (right sidebar) — edit selected element's properties
+- [x] Property inspector (right sidebar) — edit selected element's properties
 
 ### Phase 5: Converter
 - [ ] Image-to-ASCII algorithm (pure fn, with tests)
