@@ -12,7 +12,9 @@ import { useEditorStore } from '@/lib/store/editorStore';
 import { Palette } from './Palette';
 import { Canvas } from './Canvas';
 import { Inspector } from './Inspector';
+import { ConverterModal } from '@/components/converter/ConverterModal';
 import type { PaletteItemDef } from '@/lib/library/assets';
+import type { AsciiArtElement } from '@/lib/spec/types';
 
 const SIDEBAR_HEADER: React.CSSProperties = {
   padding: '4px 8px',
@@ -31,6 +33,9 @@ export function EditorShell() {
   const addElement = useEditorStore((s) => s.addElement);
   const updateElement = useEditorStore((s) => s.updateElement);
   const selectElement = useEditorStore((s) => s.selectElement);
+  const converterOpen = useEditorStore((s) => s.converterOpen);
+  const converterTargetId = useEditorStore((s) => s.converterTargetId);
+  const closeConverter = useEditorStore((s) => s.closeConverter);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
@@ -91,6 +96,13 @@ export function EditorShell() {
     [page, addElement, updateElement, selectElement],
   );
 
+  const converterElement =
+    converterTargetId != null
+      ? (page?.spec.page.elements.find(
+          (e) => e.id === converterTargetId && e.type === 'ascii_art',
+        ) as AsciiArtElement | undefined)
+      : undefined;
+
   return (
     <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
       <div className="flex-1 flex" style={{ minHeight: 0 }}>
@@ -109,6 +121,14 @@ export function EditorShell() {
           <Inspector />
         </aside>
       </div>
+
+      {converterOpen && (
+        <ConverterModal
+          key={converterTargetId ?? 'new'}
+          initialElement={converterElement}
+          onClose={closeConverter}
+        />
+      )}
     </DndContext>
   );
 }

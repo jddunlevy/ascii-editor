@@ -18,6 +18,8 @@ export function Palette() {
   const addElement = useEditorStore((s) => s.addElement);
   const selectElement = useEditorStore((s) => s.selectElement);
 
+  const openConverter = useEditorStore((s) => s.openConverter);
+
   const [modal, setModal] = useState<Modal>(null);
   const [pasteContent, setPasteContent] = useState('');
 
@@ -75,9 +77,7 @@ export function Palette() {
           <ActionButton
             label="Convert image"
             preview="⊙"
-            disabled
-            title="Coming in Phase 5"
-            onClick={() => {}}
+            onClick={() => openConverter(null)}
           />
           <ActionButton
             label="From library"

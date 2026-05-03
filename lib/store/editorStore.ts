@@ -29,6 +29,8 @@ interface EditorState {
   saveStatus: SaveStatus;
   selectedIds: string[];
   gridVisible: boolean;
+  converterOpen: boolean;
+  converterTargetId: string | null; // null = new element, string = re-edit element id
 
   // Page-level actions
   setPage: (page: EditorPage) => void;
@@ -42,6 +44,10 @@ interface EditorState {
   setSelectedIds: (ids: string[]) => void;
   toggleGrid: () => void;
 
+  // Converter modal
+  openConverter: (targetId: string | null) => void;
+  closeConverter: () => void;
+
   // Spec mutations — used by canvas in Phase 3+
   addElement: (element: Element) => void;
   updateElement: (id: string, changes: ElementChanges) => void;
@@ -54,6 +60,8 @@ export const useEditorStore = create<EditorState>((set) => ({
   saveStatus: 'saved',
   selectedIds: [],
   gridVisible: true,
+  converterOpen: false,
+  converterTargetId: null,
 
   setPage: (page) => set({ page, saveStatus: 'saved', selectedIds: [] }),
 
@@ -95,6 +103,9 @@ export const useEditorStore = create<EditorState>((set) => ({
   setSelectedIds: (ids) => set({ selectedIds: ids }),
 
   toggleGrid: () => set((state) => ({ gridVisible: !state.gridVisible })),
+
+  openConverter: (targetId) => set({ converterOpen: true, converterTargetId: targetId }),
+  closeConverter: () => set({ converterOpen: false, converterTargetId: null }),
 
   addElement: (element) =>
     set((state) => {

@@ -725,9 +725,9 @@ Build incrementally. Each phase should be runnable / testable before moving to t
 - [x] Property inspector (right sidebar) — edit selected element's properties
 
 ### Phase 5: Converter
-- [ ] Image-to-ASCII algorithm (pure fn, with tests)
-- [ ] Converter modal UI with sliders
-- [ ] Insert converted ASCII as element, preserve params for re-edit
+- [x] Image-to-ASCII algorithm (pure fn, with tests)
+- [x] Converter modal UI with sliders
+- [x] Insert converted ASCII as element, preserve params for re-edit
 
 ### Phase 6: Export / Import
 - [ ] Spec → markdown serializer (frontmatter + body)

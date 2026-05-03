@@ -293,6 +293,7 @@ export function Inspector() {
   const selectedIds = useEditorStore((s) => s.selectedIds);
   const page = useEditorStore((s) => s.page);
   const updateElement = useEditorStore((s) => s.updateElement);
+  const openConverter = useEditorStore((s) => s.openConverter);
 
   const elements = page?.spec.page.elements ?? [];
   const selected = elements.filter((e) => selectedIds.includes(e.id));
@@ -338,6 +339,7 @@ export function Inspector() {
       key={selected[0].id}
       element={selected[0]}
       updateElement={updateElement}
+      openConverter={openConverter}
     />
   );
 }
@@ -347,9 +349,11 @@ export function Inspector() {
 function SinglePane({
   element,
   updateElement,
+  openConverter,
 }: {
   element: Element;
   updateElement: (id: string, changes: ElementChanges) => void;
+  openConverter: (targetId: string | null) => void;
 }) {
   const upd = (changes: ElementChanges) => updateElement(element.id, changes);
 
@@ -407,7 +411,7 @@ function SinglePane({
 
       {/* Type-specific properties */}
       {element.type === 'text' && <TextPane el={element} upd={upd} />}
-      {element.type === 'ascii_art' && <AsciiPane el={element} upd={upd} />}
+      {element.type === 'ascii_art' && <AsciiPane el={element} upd={upd} openConverter={openConverter} />}
       {element.type === 'divider' && <DividerPane el={element} upd={upd} />}
       {element.type === 'decorative' && <DecorativePane el={element} upd={upd} />}
       {element.type === 'structural' && <StructuralPane el={element} upd={upd} />}
@@ -492,7 +496,15 @@ function TextPane({ el, upd }: { el: TextElement; upd: Upd }) {
   );
 }
 
-function AsciiPane({ el, upd }: { el: AsciiArtElement; upd: Upd }) {
+function AsciiPane({
+  el,
+  upd,
+  openConverter,
+}: {
+  el: AsciiArtElement;
+  upd: Upd;
+  openConverter: (targetId: string | null) => void;
+}) {
   const editable = el.source === 'pasted';
 
   return (
@@ -518,10 +530,25 @@ function AsciiPane({ el, upd }: { el: AsciiArtElement; upd: Upd }) {
           onChange={(v) => upd({ content: v })}
           disabled={!editable}
         />
-        {!editable && (
-          <p style={{ ...MONO, fontSize: 10, color: 'var(--muted)' }}>
-            {el.source === 'converted' ? 'Re-edit via converter' : 'Built-in asset'}
-          </p>
+        {el.source === 'converted' && (
+          <button
+            onClick={() => openConverter(el.id)}
+            style={{
+              ...MONO,
+              fontSize: 10,
+              padding: '3px 8px',
+              background: 'none',
+              border: '1px solid var(--muted)',
+              color: 'var(--muted)',
+              cursor: 'pointer',
+              textAlign: 'left',
+            }}
+          >
+            ⊙ Re-edit conversion
+          </button>
+        )}
+        {el.source === 'builtin' && (
+          <p style={{ ...MONO, fontSize: 10, color: 'var(--muted)' }}>Built-in asset</p>
         )}
       </div>
     </>
