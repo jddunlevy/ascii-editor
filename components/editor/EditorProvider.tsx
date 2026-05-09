@@ -3,7 +3,7 @@
 import { useEffect, useRef, useCallback } from 'react';
 import debounce from 'lodash/debounce';
 import { useEditorStore, type EditorPage } from '@/lib/store/editorStore';
-import { createClient } from '@/lib/supabase/client';
+import { savePage } from '@/app/(app)/actions';
 
 interface EditorProviderProps {
   initialPage: EditorPage;
@@ -39,23 +39,27 @@ function AutosaveManager() {
   const setSaveStatusRef = useRef(setSaveStatus);
   setSaveStatusRef.current = setSaveStatus;
 
-  // Create the debounced save function once, capturing via refs
+  // Track the last page object we attempted to save. After a failed save, the
+  // effect would otherwise re-fire immediately (saveStatus flips back to
+  // 'unsaved'), creating an infinite retry loop. By comparing references we
+  // skip the retry unless the user has made a new change (which produces a new
+  // page object via Zustand's immutable updates).
+  const lastAttemptedRef = useRef<EditorPage | null>(null);
+
   const debouncedSave = useRef(
     debounce(async (pageToSave: EditorPage) => {
+      lastAttemptedRef.current = pageToSave;
       setSaveStatusRef.current('saving');
       try {
-        const supabase = createClient();
-        const { error } = await supabase
-          .from('pages')
-          .update({
-            title: pageToSave.title,
-            spec: pageToSave.spec,
-            updated_at: new Date().toISOString(),
-          })
-          .eq('id', pageToSave.id);
-
-        setSaveStatusRef.current(error ? 'unsaved' : 'saved');
-      } catch {
+        const result = await savePage(pageToSave.id, pageToSave.title, pageToSave.spec);
+        if (result !== null) {
+          console.error('[autosave] failed:', result.error);
+          setSaveStatusRef.current('unsaved');
+        } else {
+          setSaveStatusRef.current('saved');
+        }
+      } catch (err) {
+        console.error('[autosave] threw:', err);
         setSaveStatusRef.current('unsaved');
       }
     }, 1500),
@@ -67,9 +71,11 @@ function AutosaveManager() {
     return () => fn.cancel();
   }, []);
 
-  // Trigger save whenever the page becomes 'unsaved'
+  // Trigger save whenever the page state changes to 'unsaved', but only if
+  // the page object is different from the last one we attempted (to prevent
+  // retrying a save that just failed for the same content).
   useEffect(() => {
-    if (saveStatus === 'unsaved' && page) {
+    if (saveStatus === 'unsaved' && page && lastAttemptedRef.current !== page) {
       debouncedSave.current(page);
     }
   }, [saveStatus, page]);
@@ -80,7 +86,6 @@ function AutosaveManager() {
       if ((e.metaKey || e.ctrlKey) && e.key === 's') {
         e.preventDefault();
         if (saveStatus === 'unsaved' && page) {
-          debouncedSave.current.cancel();
           debouncedSave.current.flush();
         }
       }
