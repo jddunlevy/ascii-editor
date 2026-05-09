@@ -730,10 +730,10 @@ Build incrementally. Each phase should be runnable / testable before moving to t
 - [x] Insert converted ASCII as element, preserve params for re-edit
 
 ### Phase 6: Export / Import
-- [ ] Spec → markdown serializer (frontmatter + body)
-- [ ] Markdown → spec parser
-- [ ] Export button + download
-- [ ] Import button + upload
+- [x] Spec → markdown serializer (frontmatter + body)
+- [x] Markdown → spec parser
+- [x] Export button + download
+- [x] Import button + upload
 
 ### Phase 7: Polish
 - [ ] Undo / redo stack

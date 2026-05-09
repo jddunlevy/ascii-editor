@@ -2,8 +2,9 @@
 
 import { useState, useRef, useCallback } from 'react';
 import { useDraggable } from '@dnd-kit/core';
-import { useEditorStore } from '@/lib/store/editorStore';
+import { useEditorStore, type ElementChanges } from '@/lib/store/editorStore';
 import { ElementRenderer } from './ElementRenderer';
+import { measureAsciiContent, getCharWidthRatio, ASCII_LINE_HEIGHT } from '@/lib/spec/ascii';
 import type { Element } from '@/lib/spec/types';
 
 // Handle positions as [xFraction, yFraction]
@@ -120,7 +121,7 @@ interface ResizeHandlesProps {
   grid: number;
   canvasWidth: number;
   canvasHeight: number;
-  updateElement: (id: string, changes: Partial<Element>) => void;
+  updateElement: (id: string, changes: ElementChanges) => void;
 }
 
 function ResizeHandles({
@@ -169,6 +170,43 @@ function ResizeHandles({
         let newW = w;
         let newH = h;
 
+        // ── ASCII art: aspect-locked resize driven by fontSize ──────────────
+        if (element.type === 'ascii_art') {
+          const { rows, cols } = measureAsciiContent(element.content);
+          const ratio = getCharWidthRatio(element.font);
+
+          // Drive from the axis that is being resized.
+          // Corner handles affect W; N/S handles affect only H.
+          let rawFontSize: number;
+          if (affectsW) {
+            const rawW = movesX ? w - dx : w + dx;
+            rawFontSize = cols > 0 ? rawW / (cols * ratio) : 14;
+          } else {
+            const rawH = movesY ? h - dy : h + dy;
+            rawFontSize = rows > 0 ? rawH / (rows * ASCII_LINE_HEIGHT) : 14;
+          }
+
+          const newFontSize = Math.max(4, Math.min(96, rawFontSize));
+          newW = Math.max(1, Math.ceil(cols * newFontSize * ratio));
+          newH = Math.max(1, Math.ceil(rows * newFontSize * ASCII_LINE_HEIGHT));
+
+          // Keep the fixed edge stationary.
+          if (movesX && affectsW) newX = posX + w - newW;
+          if (movesY && affectsH) newY = posY + h - newH;
+
+          // Clamp to canvas bounds.
+          newX = Math.max(0, Math.min(newX, canvasWidth - newW));
+          newY = Math.max(0, Math.min(newY, canvasHeight - newH));
+
+          updateElement(element.id, {
+            position: { x: newX, y: newY },
+            size: { w: newW, h: newH },
+            fontSize: newFontSize,
+          });
+          return;
+        }
+
+        // ── Standard resize (all other element types) ───────────────────────
         if (affectsW) {
           const rawW = movesX ? w - dx : w + dx;
           newW = Math.max(minSize, Math.round(rawW / grid) * grid);

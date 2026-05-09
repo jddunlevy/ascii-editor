@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useEditorStore, type SaveStatus } from '@/lib/store/editorStore';
+import { ExportModal } from './ExportModal';
 
 export function EditorToolbar() {
   const title = useEditorStore((s) => s.page?.title ?? 'Untitled');
@@ -11,6 +12,7 @@ export function EditorToolbar() {
 
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(title);
+  const [exportOpen, setExportOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Keep draft in sync with store title when not editing
@@ -78,13 +80,14 @@ export function EditorToolbar() {
       {/* Right: actions */}
       <div className="flex items-center gap-2 shrink-0">
         <button
-          disabled
-          className="border border-muted text-muted text-xs px-3 py-1 cursor-not-allowed opacity-60"
-          title="Export — coming in Phase 6"
+          onClick={() => setExportOpen(true)}
+          className="border border-muted text-muted text-xs px-3 py-1 hover:text-ink hover:border-ink transition-colors"
         >
           Export .md
         </button>
       </div>
+
+      {exportOpen && <ExportModal onClose={() => setExportOpen(false)} />}
     </div>
   );
 }

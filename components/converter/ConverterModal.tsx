@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { nanoid } from 'nanoid';
 import { useEditorStore } from '@/lib/store/editorStore';
 import { convertImageToAscii, CHARSETS, type CharsetName } from './convert';
+import { fitAsciiToViewport } from '@/lib/spec/ascii';
 import type { AsciiArtElement, ConversionParams } from '@/lib/spec/types';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -120,18 +121,19 @@ export function ConverterModal({ initialElement, onClose }: Props) {
   function handlePlace() {
     if (!asciiOutput.trim()) return;
 
-    const lines = asciiOutput.split('\n');
-    const charW = Math.max(...lines.map((l) => l.length));
-    const fontSize = 13;
-    const charWidthPx = fontSize * 0.6;
-    const lineHeightPx = fontSize * 1.4;
-    const estimatedW = Math.round(charW * charWidthPx + 16);
-    const estimatedH = Math.round(lines.length * lineHeightPx + 16);
+    const canvas = page?.spec.page.canvas;
+    const viewport = canvas ? { w: canvas.width, h: canvas.height } : { w: 1200, h: 800 };
+    const { fontSize, w: estimatedW, h: estimatedH } = fitAsciiToViewport(
+      asciiOutput,
+      'jetbrains-mono',
+      viewport,
+    );
 
     if (isReEdit && initialElement) {
       updateElement(initialElement.id, {
         content: asciiOutput,
         conversionParams: params,
+        fontSize,
         size: { w: estimatedW, h: estimatedH },
       });
       onClose();

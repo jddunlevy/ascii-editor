@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { createPage, deletePage } from '../actions';
+import { ImportButton } from '@/components/dashboard/ImportButton';
 import type { PageListRow } from '@/lib/spec/types';
 
 function timeAgo(dateStr: string): string {
@@ -30,14 +31,7 @@ export default async function DashboardPage() {
       <div className="w-full max-w-2xl mb-8 flex items-center justify-between">
         <h2 className="text-ink text-sm font-medium">Pages</h2>
         <div className="flex gap-2">
-          {/* Import button — wired up in Phase 6 */}
-          <button
-            disabled
-            className="border border-muted text-muted text-xs px-3 py-1.5 cursor-not-allowed opacity-60"
-            title="Coming in a later phase"
-          >
-            Import .md
-          </button>
+          <ImportButton className="border border-muted text-muted text-xs px-3 py-1.5 hover:text-ink hover:border-ink transition-colors" />
           <form action={createPage}>
             <button
               type="submit"
@@ -100,12 +94,7 @@ export default async function DashboardPage() {
                 + New page
               </button>
             </form>
-            <button
-              disabled
-              className="border border-muted text-muted text-xs px-4 py-2 cursor-not-allowed opacity-50"
-            >
-              Import .md
-            </button>
+            <ImportButton className="border border-muted text-muted text-xs px-4 py-2 hover:text-ink hover:border-ink transition-colors" />
           </div>
         </div>
       )}

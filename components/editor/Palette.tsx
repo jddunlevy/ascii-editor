@@ -10,6 +10,7 @@ import {
   type PaletteItemDef,
   type LibraryAsset,
 } from '@/lib/library/assets';
+import { fitAsciiToViewport } from '@/lib/spec/ascii';
 
 type Modal = 'paste' | 'library-ascii' | 'library-sprite' | null;
 
@@ -29,22 +30,33 @@ export function Palette() {
 
   function insertAsset(asset: LibraryAsset) {
     const el = asset.createElement(defaultPos, maxZ + 1);
-    addElement(el);
+    if (el.type === 'ascii_art') {
+      const canvas = page?.spec.page.canvas;
+      const viewport = canvas ? { w: canvas.width, h: canvas.height } : { w: 1200, h: 800 };
+      const { fontSize, w, h } = fitAsciiToViewport(el.content, el.font, viewport);
+      addElement({ ...el, fontSize, size: { w, h } });
+    } else {
+      addElement(el);
+    }
     selectElement(el.id, false);
   }
 
   function commitPaste() {
     if (!pasteContent.trim()) return;
+    const canvas = page?.spec.page.canvas;
+    const viewport = canvas ? { w: canvas.width, h: canvas.height } : { w: 1200, h: 800 };
+    const font = 'jetbrains-mono' as const;
+    const { fontSize, w, h } = fitAsciiToViewport(pasteContent, font, viewport);
     const el = {
       id: nanoid(),
       type: 'ascii_art' as const,
       source: 'pasted' as const,
       content: pasteContent,
-      font: 'jetbrains-mono' as const,
-      fontSize: 13,
+      font,
+      fontSize,
       color: '#1a1a1a',
       position: defaultPos,
-      size: { w: 400, h: 200 },
+      size: { w, h },
       z: maxZ + 1,
     };
     addElement(el);

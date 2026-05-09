@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useEditorStore, type ElementChanges } from '@/lib/store/editorStore';
+import { computeAsciiBox } from '@/lib/spec/ascii';
 import type {
   Element,
   TextElement,
@@ -518,10 +519,14 @@ function AsciiPane({
           onChange={(v) => upd({ font: v })}
         />
         <NumberInput
-          label="Size"
-          value={el.fontSize}
-          min={8}
-          onChange={(v) => upd({ fontSize: v })}
+          label="Scale"
+          value={Math.round(el.fontSize)}
+          min={4}
+          max={96}
+          onChange={(v) => {
+            const { w, h } = computeAsciiBox(el.content, v, el.font);
+            upd({ fontSize: v, size: { w, h } });
+          }}
         />
         <ColorInput label="Color" value={el.color} onChange={(v) => upd({ color: v })} />
         <TextareaInput
