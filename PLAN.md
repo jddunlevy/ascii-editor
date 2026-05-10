@@ -736,12 +736,12 @@ Build incrementally. Each phase should be runnable / testable before moving to t
 - [x] Import button + upload
 
 ### Phase 7: Polish
-- [ ] Undo / redo stack
-- [ ] Keyboard shortcuts
-- [ ] Color picker (theme + custom escape hatch)
-- [ ] Empty states, loading states, error states
-- [ ] Visual grid overlay (toggleable)
-- [ ] Page rename / duplicate / delete
+- [x] Undo / redo stack
+- [x] Keyboard shortcuts
+- [x] Color picker (theme + custom escape hatch)
+- [x] Empty states, loading states, error states
+- [x] Visual grid overlay (toggleable)
+- [x] Page rename / duplicate / delete
 
 ### Phase 8: Pre-launch
 - [ ] Accessibility pass (focus states, keyboard nav)

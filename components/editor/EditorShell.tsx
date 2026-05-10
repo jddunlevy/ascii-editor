@@ -104,7 +104,7 @@ export function EditorShell() {
       : undefined;
 
   return (
-    <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
+    <DndContext id="editor-dnd" sensors={sensors} onDragEnd={handleDragEnd}>
       <div className="flex-1 flex" style={{ minHeight: 0 }}>
         {/* Left: Palette */}
         <aside className="w-48 border-r border-muted bg-surface shrink-0 flex flex-col">

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useEditorStore, type ElementChanges } from '@/lib/store/editorStore';
 import { computeAsciiBox } from '@/lib/spec/ascii';
+import { ColorPicker } from './ColorPicker';
 import type {
   Element,
   TextElement,
@@ -133,43 +134,6 @@ function TextInput({
   );
 }
 
-function ColorInput({
-  label,
-  value,
-  onChange,
-}: {
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
-}) {
-  const [draft, setDraft] = useState(value);
-  useEffect(() => setDraft(value), [value]);
-
-  return (
-    <Row>
-      <span style={labelSt}>{label}</span>
-      <span
-        style={{
-          width: 14,
-          height: 14,
-          background: value,
-          border: '1px solid var(--muted)',
-          flexShrink: 0,
-          display: 'inline-block',
-        }}
-      />
-      <input
-        type="text"
-        value={draft}
-        onChange={(e) => setDraft(e.target.value)}
-        onBlur={() => onChange(draft)}
-        onKeyDown={(e) => e.key === 'Enter' && onChange(draft)}
-        placeholder="#000000"
-        style={{ ...inputSt, flex: 1 }}
-      />
-    </Row>
-  );
-}
 
 function TextareaInput({
   label,
@@ -485,7 +449,7 @@ function TextPane({ el, upd }: { el: TextElement; upd: Upd }) {
           min={8}
           onChange={(v) => upd({ fontSize: v })}
         />
-        <ColorInput label="Color" value={el.color} onChange={(v) => upd({ color: v })} />
+        <ColorPicker label="Color" value={el.color} onChange={(v) => upd({ color: v })} />
         <AlignInput value={el.align} onChange={(v) => upd({ align: v })} />
         <TextareaInput
           label="Content"
@@ -528,7 +492,7 @@ function AsciiPane({
             upd({ fontSize: v, size: { w, h } });
           }}
         />
-        <ColorInput label="Color" value={el.color} onChange={(v) => upd({ color: v })} />
+        <ColorPicker label="Color" value={el.color} onChange={(v) => upd({ color: v })} />
         <TextareaInput
           label="Content"
           value={el.content}
@@ -571,7 +535,7 @@ function DividerPane({ el, upd }: { el: DividerElement; upd: Upd }) {
           onChange={(v) => upd({ pattern: v })}
           mono
         />
-        <ColorInput label="Color" value={el.color} onChange={(v) => upd({ color: v })} />
+        <ColorPicker label="Color" value={el.color} onChange={(v) => upd({ color: v })} />
       </div>
     </>
   );
@@ -583,7 +547,7 @@ function DecorativePane({ el, upd }: { el: DecorativeElement; upd: Upd }) {
       <SectionHead>Decorative</SectionHead>
       <div style={{ padding: '0 8px', display: 'flex', flexDirection: 'column', gap: 4 }}>
         <TextInput label="ID" value={el.builtinId} onChange={() => {}} disabled />
-        <ColorInput label="Color" value={el.color} onChange={(v) => upd({ color: v })} />
+        <ColorPicker label="Color" value={el.color} onChange={(v) => upd({ color: v })} />
       </div>
     </>
   );

@@ -63,6 +63,47 @@ export async function savePage(
   return null;
 }
 
+export async function renamePage(id: string, title: string): Promise<void> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect('/login');
+
+  await supabase
+    .from('pages')
+    .update({ title, updated_at: new Date().toISOString() })
+    .eq('id', id)
+    .eq('user_id', user.id);
+
+  revalidatePath('/dashboard');
+}
+
+export async function duplicatePage(id: string): Promise<void> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect('/login');
+
+  const { data: source } = await supabase
+    .from('pages')
+    .select('title, spec')
+    .eq('id', id)
+    .eq('user_id', user.id)
+    .single();
+
+  if (!source) return;
+
+  await supabase.from('pages').insert({
+    user_id: user.id,
+    title: `${source.title} (copy)`,
+    spec: source.spec,
+  });
+
+  revalidatePath('/dashboard');
+}
+
 export async function importPage(
   text: string,
 ): Promise<{ error: string } | undefined> {

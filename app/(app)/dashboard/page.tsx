@@ -1,19 +1,8 @@
-import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
-import { createPage, deletePage } from '../actions';
+import { createPage } from '../actions';
 import { ImportButton } from '@/components/dashboard/ImportButton';
+import { PageRow } from '@/components/dashboard/PageRow';
 import type { PageListRow } from '@/lib/spec/types';
-
-function timeAgo(dateStr: string): string {
-  const diff = Date.now() - new Date(dateStr).getTime();
-  const mins = Math.floor(diff / 60000);
-  if (mins < 1) return 'just now';
-  if (mins < 60) return `${mins}m ago`;
-  const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h ago`;
-  const days = Math.floor(hrs / 24);
-  return `${days}d ago`;
-}
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -46,28 +35,7 @@ export default async function DashboardPage() {
       {hasPages ? (
         <ul className="w-full max-w-2xl divide-y divide-muted border border-muted">
           {pages.map((page) => (
-            <li key={page.id} className="flex items-center justify-between px-4 py-3 hover:bg-surface transition-colors group">
-              <Link
-                href={`/editor/${page.id}`}
-                className="flex-1 min-w-0 mr-4"
-              >
-                <span className="text-ink text-sm block truncate">
-                  {page.title || 'Untitled'}
-                </span>
-                <span className="text-muted text-xs">
-                  {timeAgo(page.updated_at)}
-                </span>
-              </Link>
-              <form action={deletePage.bind(null, page.id)}>
-                <button
-                  type="submit"
-                  className="text-muted text-xs opacity-0 group-hover:opacity-100 hover:text-ink transition-opacity px-2 py-1"
-                  title="Delete page"
-                >
-                  ✕
-                </button>
-              </form>
-            </li>
+            <PageRow key={page.id} page={page} />
           ))}
         </ul>
       ) : (
