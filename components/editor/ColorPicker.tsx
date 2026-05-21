@@ -126,9 +126,9 @@ export function ColorPicker({ label, value, onChange }: ColorPickerProps) {
 
       {/* Swatch row: theme colors + grayscale */}
       <div style={{ display: 'flex', gap: 3, paddingLeft: 42 }}>
-        {[...themeSwatches, ...GRAYSCALE].map((hex) => (
+        {[...themeSwatches, ...GRAYSCALE].map((hex, i) => (
           <button
-            key={hex}
+            key={i}
             title={hex}
             onClick={() => { onChange(hex); setDraft(hex); }}
             style={{

@@ -27,9 +27,12 @@ export async function proxy(request: NextRequest) {
 
   // IMPORTANT: Do not add logic between createServerClient and getUser().
   // Any intervening code risks missing a token refresh.
+  const getUserTimeout = new Promise<{ data: { user: null } }>((resolve) =>
+    setTimeout(() => resolve({ data: { user: null } }), 3000),
+  );
   const {
     data: { user },
-  } = await supabase.auth.getUser();
+  } = await Promise.race([supabase.auth.getUser(), getUserTimeout]);
 
   const { pathname } = request.nextUrl;
 
