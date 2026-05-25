@@ -139,6 +139,7 @@ export interface PageListRow {
   title: string;
   created_at: string;
   updated_at: string;
+  in_library: boolean;
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────

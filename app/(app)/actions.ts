@@ -104,6 +104,22 @@ export async function duplicatePage(id: string): Promise<void> {
   revalidatePath('/dashboard');
 }
 
+export async function setPageLibraryStatus(id: string, inLibrary: boolean): Promise<void> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect('/login');
+
+  await supabase
+    .from('pages')
+    .update({ in_library: inLibrary, updated_at: new Date().toISOString() })
+    .eq('id', id)
+    .eq('user_id', user.id);
+
+  revalidatePath('/dashboard');
+}
+
 export async function importPage(
   text: string,
 ): Promise<{ error: string } | undefined> {

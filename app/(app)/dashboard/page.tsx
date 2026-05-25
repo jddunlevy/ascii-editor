@@ -8,10 +8,12 @@ export default async function DashboardPage() {
   const supabase = await createClient();
   const { data: pages } = await supabase
     .from('pages')
-    .select('id, title, created_at, updated_at')
+    .select('id, title, created_at, updated_at, in_library')
     .order('updated_at', { ascending: false })
     .returns<PageListRow[]>();
 
+  const libraryPages = pages?.filter((p) => p.in_library) ?? [];
+  const otherPages = pages?.filter((p) => !p.in_library) ?? [];
   const hasPages = pages && pages.length > 0;
 
   return (
@@ -33,11 +35,34 @@ export default async function DashboardPage() {
       </div>
 
       {hasPages ? (
-        <ul className="w-full max-w-2xl divide-y divide-muted border border-muted">
-          {pages.map((page) => (
-            <PageRow key={page.id} page={page} />
-          ))}
-        </ul>
+        <div className="w-full max-w-2xl flex flex-col gap-8">
+          {libraryPages.length > 0 && (
+            <div>
+              <h3 className="text-ink text-xs font-medium mb-2">Library</h3>
+              <ul className="divide-y divide-muted border border-muted">
+                {libraryPages.map((page) => (
+                  <PageRow key={page.id} page={page} inLibrary={true} />
+                ))}
+              </ul>
+            </div>
+          )}
+          <div>
+            {libraryPages.length > 0 && (
+              <h3 className="text-ink text-xs font-medium mb-2">Pages</h3>
+            )}
+            {otherPages.length > 0 ? (
+              <ul className="divide-y divide-muted border border-muted">
+                {otherPages.map((page) => (
+                  <PageRow key={page.id} page={page} inLibrary={false} />
+                ))}
+              </ul>
+            ) : (
+              libraryPages.length > 0 && (
+                <p className="text-muted text-xs">No other pages.</p>
+              )
+            )}
+          </div>
+        </div>
       ) : (
         /* Empty state */
         <div className="w-full max-w-2xl flex flex-col items-center py-20 border border-muted">

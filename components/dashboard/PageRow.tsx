@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react';
 import Link from 'next/link';
-import { renamePage, duplicatePage, deletePage } from '@/app/(app)/actions';
+import { renamePage, duplicatePage, deletePage, setPageLibraryStatus } from '@/app/(app)/actions';
 import type { PageListRow } from '@/lib/spec/types';
 
 function timeAgo(dateStr: string): string {
@@ -16,9 +16,10 @@ function timeAgo(dateStr: string): string {
   return `${days}d ago`;
 }
 
-export function PageRow({ page }: { page: PageListRow }) {
+export function PageRow({ page, inLibrary }: { page: PageListRow; inLibrary: boolean }) {
   const [renaming, setRenaming] = useState(false);
   const [draft, setDraft] = useState(page.title || 'Untitled');
+  const [libraryState, setLibraryState] = useState(inLibrary);
   const inputRef = useRef<HTMLInputElement>(null);
 
   function startRename(e: React.MouseEvent) {
@@ -67,6 +68,17 @@ export function PageRow({ page }: { page: PageListRow }) {
 
       {/* Hover actions */}
       <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        {/* Library toggle */}
+        <button
+          onClick={() => {
+            setLibraryState((prev) => !prev);
+            setPageLibraryStatus(page.id, !libraryState);
+          }}
+          className="text-muted text-xs hover:text-ink transition-colors px-2 py-1"
+          title={libraryState ? 'Remove from library' : 'Save to library'}
+        >
+          {libraryState ? '★' : '☆'}
+        </button>
         {/* Rename */}
         <button
           onClick={startRename}

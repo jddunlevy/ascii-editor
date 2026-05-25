@@ -19,6 +19,8 @@ export function Canvas() {
   const nudgeElements = useEditorStore((s) => s.nudgeElements);
   const bringToFront = useEditorStore((s) => s.bringToFront);
   const sendToBack = useEditorStore((s) => s.sendToBack);
+  const copyElements = useEditorStore((s) => s.copyElements);
+  const pasteElements = useEditorStore((s) => s.pasteElements);
 
   // Register the canvas div as a dnd-kit drop target.
   // EditorShell's handleDragEnd uses over.rect to compute drop coordinates.
@@ -57,6 +59,15 @@ export function Canvas() {
           if (selectedIds.length > 0 && page) {
             duplicateElements(selectedIds, page.spec.page.canvas.grid);
           }
+          return;
+        }
+        if (e.key === 'c' && !inInput && selectedIds.length > 0) {
+          copyElements(selectedIds);
+          return;
+        }
+        if (e.key === 'v' && !inInput) {
+          e.preventDefault();
+          pasteElements(page?.spec.page.canvas.grid ?? 8);
           return;
         }
         if (e.key === ']' && !inInput) {
@@ -117,6 +128,8 @@ export function Canvas() {
       nudgeElements,
       bringToFront,
       sendToBack,
+      copyElements,
+      pasteElements,
     ],
   );
 

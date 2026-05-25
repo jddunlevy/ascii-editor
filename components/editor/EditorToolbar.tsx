@@ -4,8 +4,14 @@ import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useEditorStore, type SaveStatus } from '@/lib/store/editorStore';
 import { ExportModal } from './ExportModal';
+import { setPageLibraryStatus } from '@/app/(app)/actions';
 
-export function EditorToolbar() {
+interface EditorToolbarProps {
+  pageId: string;
+  initialInLibrary: boolean;
+}
+
+export function EditorToolbar({ pageId, initialInLibrary }: EditorToolbarProps) {
   const title = useEditorStore((s) => s.page?.title ?? 'Untitled');
   const saveStatus = useEditorStore((s) => s.saveStatus);
   const updateTitle = useEditorStore((s) => s.updateTitle);
@@ -13,6 +19,7 @@ export function EditorToolbar() {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(title);
   const [exportOpen, setExportOpen] = useState(false);
+  const [inLibrary, setInLibrary] = useState(initialInLibrary);
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Keep draft in sync with store title when not editing
@@ -79,6 +86,16 @@ export function EditorToolbar() {
 
       {/* Right: actions */}
       <div className="flex items-center gap-2 shrink-0">
+        <button
+          onClick={() => {
+            setInLibrary((prev) => !prev);
+            setPageLibraryStatus(pageId, !inLibrary);
+          }}
+          className="border border-muted text-muted text-xs px-3 py-1 hover:text-ink hover:border-ink transition-colors"
+          title={inLibrary ? 'Remove from library' : 'Save to library'}
+        >
+          {inLibrary ? '★ Library' : '☆ Library'}
+        </button>
         <button
           onClick={() => setExportOpen(true)}
           className="border border-muted text-muted text-xs px-3 py-1 hover:text-ink hover:border-ink transition-colors"

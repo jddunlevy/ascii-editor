@@ -65,6 +65,11 @@ interface EditorState {
   removeElements: (ids: string[]) => void;
   setElements: (elements: Element[]) => void;
 
+  // Clipboard (session-scoped)
+  clipboard: Element[] | null;
+  copyElements: (ids: string[]) => void;
+  pasteElements: (gridUnit: number) => void;
+
   // Compound element actions
   duplicateElements: (ids: string[], gridUnit: number) => void;
   nudgeElements: (ids: string[], dx: number, dy: number, canvasW: number, canvasH: number) => void;
@@ -86,6 +91,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   converterTargetId: null,
   past: [],
   future: [],
+  clipboard: null,
 
   setPage: (page) => set({ page, saveStatus: 'saved', selectedIds: [], past: [], future: [] }),
 
@@ -252,6 +258,41 @@ export const useEditorStore = create<EditorState>((set, get) => ({
             page: { ...state.page.spec.page, elements },
           },
         },
+        saveStatus: 'unsaved',
+      };
+    }),
+
+  copyElements: (ids) =>
+    set((state) => {
+      if (!state.page || ids.length === 0) return state;
+      const idSet = new Set(ids);
+      const clipboard = state.page.spec.page.elements.filter((el) => idSet.has(el.id));
+      return { clipboard };
+    }),
+
+  pasteElements: (gridUnit) =>
+    set((state) => {
+      if (!state.page || !state.clipboard || state.clipboard.length === 0) return state;
+      const current = state.page.spec.page.elements;
+      const maxZ = current.length > 0 ? Math.max(...current.map((e) => e.z)) : 0;
+      let zOffset = 1;
+      const copies: Element[] = state.clipboard.map((el) => ({
+        ...el,
+        id: nanoid(),
+        position: { x: el.position.x + gridUnit, y: el.position.y + gridUnit },
+        z: maxZ + zOffset++,
+      } as Element));
+      return {
+        past: pushHistory(state.past, current),
+        future: [],
+        page: {
+          ...state.page,
+          spec: {
+            ...state.page.spec,
+            page: { ...state.page.spec.page, elements: [...current, ...copies] },
+          },
+        },
+        selectedIds: copies.map((c) => c.id),
         saveStatus: 'unsaved',
       };
     }),

@@ -21,7 +21,7 @@ export default async function EditorPage({ params }: EditorPageProps) {
 
   const { data: row } = await supabase
     .from('pages')
-    .select('id, title, spec')
+    .select('id, title, spec, in_library')
     .eq('id', pageId)
     .eq('user_id', user.id)
     .single();
@@ -37,7 +37,7 @@ export default async function EditorPage({ params }: EditorPageProps) {
   return (
     <EditorProvider initialPage={initialPage}>
       <div className="flex-1 flex flex-col" style={{ minHeight: 0 }}>
-        <EditorToolbar />
+        <EditorToolbar pageId={row.id} initialInLibrary={row.in_library ?? false} />
         <EditorShell />
       </div>
     </EditorProvider>

@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Script from 'next/script';
 import {
   JetBrains_Mono,
   IBM_Plex_Mono,
@@ -60,15 +61,18 @@ export default function RootLayout({
 
   return (
     <html lang="en" data-theme="notebook" className={fontVars}>
-      <head>
-        {/* Prevent flash of wrong theme by reading localStorage before paint */}
-        <script
+      <body className="min-h-screen">
+        {children}
+        {/* Prevent flash of wrong theme by reading localStorage before paint.
+            strategy="beforeInteractive" injects this into <head> before hydration. */}
+        <Script
+          id="theme-init"
+          strategy="beforeInteractive"
           dangerouslySetInnerHTML={{
             __html: `(function(){try{var t=localStorage.getItem('ascii-editor-theme');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();`,
           }}
         />
-      </head>
-      <body className="min-h-screen">{children}</body>
+      </body>
     </html>
   );
 }
