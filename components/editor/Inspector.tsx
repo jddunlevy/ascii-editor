@@ -3,6 +3,12 @@
 import { useState, useEffect } from 'react';
 import { useEditorStore, type ElementChanges } from '@/lib/store/editorStore';
 import { computeAsciiBox } from '@/lib/spec/ascii';
+import {
+  CANVAS_PRESETS,
+  CANVAS_MIN_SIZE,
+  CANVAS_MAX_SIZE,
+  matchPreset,
+} from '@/lib/spec/canvasPresets';
 import { ColorPicker } from './ColorPicker';
 import type {
   Element,
@@ -259,32 +265,90 @@ export function Inspector() {
   const page = useEditorStore((s) => s.page);
   const updateElement = useEditorStore((s) => s.updateElement);
   const openConverter = useEditorStore((s) => s.openConverter);
+  const updateCanvas = useEditorStore((s) => s.updateCanvas);
 
+  const canvas = page?.spec.page.canvas;
   const elements = page?.spec.page.elements ?? [];
   const selected = elements.filter((e) => selectedIds.includes(e.id));
 
   if (selected.length === 0) {
     return (
-      <div
-        style={{
-          flex: 1,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: 12,
-        }}
-      >
-        <p
-          style={{
-            ...MONO,
-            fontSize: 11,
-            color: 'var(--muted)',
-            textAlign: 'center',
-            lineHeight: 1.7,
-          }}
-        >
-          Select an element{'\n'}to inspect
-        </p>
+      <div style={{ flex: 1, overflowY: 'auto', padding: '4px 0 16px' }}>
+        <SectionHead>Canvas</SectionHead>
+        <div style={{ padding: '0 8px', display: 'flex', flexDirection: 'column', gap: 4 }}>
+          {canvas && (
+            <>
+              <SelectInput
+                label="Size"
+                value={matchPreset(canvas.width, canvas.height) ?? 'custom'}
+                options={[
+                  ...CANVAS_PRESETS.map((p) => ({
+                    value: p.label,
+                    label: `${p.label} ${p.width}\u00d7${p.height}`,
+                  })),
+                  { value: 'custom', label: 'Custom' },
+                ]}
+                onChange={(label) => {
+                  const preset = CANVAS_PRESETS.find((p) => p.label === label);
+                  if (preset) updateCanvas({ width: preset.width, height: preset.height });
+                }}
+              />
+              <Row>
+                <NumberInput
+                  label="W"
+                  value={canvas.width}
+                  min={CANVAS_MIN_SIZE}
+                  max={CANVAS_MAX_SIZE}
+                  onChange={(v) => updateCanvas({ width: v })}
+                />
+                <NumberInput
+                  label="H"
+                  value={canvas.height}
+                  min={CANVAS_MIN_SIZE}
+                  max={CANVAS_MAX_SIZE}
+                  onChange={(v) => updateCanvas({ height: v })}
+                />
+                <button
+                  onClick={() => updateCanvas({ width: canvas.height, height: canvas.width })}
+                  title="Swap width and height"
+                  style={{
+                    ...MONO,
+                    fontSize: 11,
+                    padding: '1px 6px',
+                    background: 'var(--bg)',
+                    border: '1px solid var(--muted)',
+                    color: 'var(--muted)',
+                    cursor: 'pointer',
+                  }}
+                >
+                  ⇄
+                </button>
+              </Row>
+            </>
+          )}
+          <ColorPicker
+            label="BG"
+            value={canvas?.background ?? '#ffffff'}
+            onChange={(hex) => updateCanvas({ background: hex })}
+          />
+          {canvas?.background !== undefined && (
+            <button
+              onClick={() => updateCanvas({ background: undefined })}
+              style={{
+                ...MONO,
+                fontSize: 10,
+                padding: '3px 8px',
+                background: 'none',
+                border: '1px solid var(--muted)',
+                color: 'var(--muted)',
+                cursor: 'pointer',
+                textAlign: 'left',
+              }}
+            >
+              ↺ Reset to theme default
+            </button>
+          )}
+        </div>
       </div>
     );
   }
