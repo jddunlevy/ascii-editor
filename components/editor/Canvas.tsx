@@ -168,7 +168,7 @@ export function Canvas() {
           width,
           height,
           flexShrink: 0,
-          background: 'var(--surface)',
+          background: canvas.background ?? 'var(--surface)',
           boxShadow: '0 2px 16px rgba(0,0,0,0.10)',
           ...gridBg,
         }}

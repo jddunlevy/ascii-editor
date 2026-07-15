@@ -8,6 +8,7 @@ import type {
   DividerElement,
   DecorativeElement,
   StructuralElement,
+  CanvasConfig,
 } from '@/lib/spec/types';
 
 export type ElementChanges =
@@ -43,6 +44,7 @@ interface EditorState {
   setPage: (page: EditorPage) => void;
   clearPage: () => void;
   updateTitle: (title: string) => void;
+  updateCanvas: (changes: Partial<CanvasConfig>) => void;
   setSaveStatus: (status: SaveStatus) => void;
 
   // Selection actions
@@ -107,6 +109,24 @@ export const useEditorStore = create<EditorState>((set, get) => ({
           spec: {
             ...state.page.spec,
             page: { ...state.page.spec.page, title },
+          },
+        },
+        saveStatus: 'unsaved',
+      };
+    }),
+
+  updateCanvas: (changes) =>
+    set((state) => {
+      if (!state.page) return state;
+      return {
+        page: {
+          ...state.page,
+          spec: {
+            ...state.page.spec,
+            page: {
+              ...state.page.spec.page,
+              canvas: { ...state.page.spec.page.canvas, ...changes },
+            },
           },
         },
         saveStatus: 'unsaved',

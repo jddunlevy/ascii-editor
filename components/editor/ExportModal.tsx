@@ -3,8 +3,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useEditorStore } from '@/lib/store/editorStore';
 import { exportToMarkdown, slugifyTitle } from '@/lib/spec/export';
+import { exportToHtml } from '@/lib/spec/exportHtml';
 
 const MONO: React.CSSProperties = { fontFamily: 'ui-monospace, monospace' };
+
+type Tab = 'md' | 'html';
 
 interface Props {
   onClose: () => void;
@@ -12,25 +15,15 @@ interface Props {
 
 export function ExportModal({ onClose }: Props) {
   const page = useEditorStore((s) => s.page);
+  const [tab, setTab] = useState<Tab>('md');
   const [markdown, setMarkdown] = useState('');
+  const [html, setHtml] = useState('');
 
   useEffect(() => {
-    if (page) setMarkdown(exportToMarkdown(page.spec));
-  }, [page]);
-
-  const download = useCallback(() => {
     if (!page) return;
-    const slug = slugifyTitle(page.title);
-    const blob = new Blob([markdown], { type: 'text/markdown; charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${slug}.md`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  }, [page, markdown]);
+    setMarkdown(exportToMarkdown(page.spec));
+    setHtml(exportToHtml(page.spec));
+  }, [page]);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -39,6 +32,35 @@ export function ExportModal({ onClose }: Props) {
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
   }, [onClose]);
+
+  const content = tab === 'md' ? markdown : html;
+
+  const download = useCallback(() => {
+    if (!page || !content) return;
+    const slug = slugifyTitle(page.title);
+    const ext = tab === 'md' ? 'md' : 'html';
+    const mime = tab === 'md' ? 'text/markdown; charset=utf-8' : 'text/html; charset=utf-8';
+    const blob = new Blob([content], { type: mime });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${slug}.${ext}`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, [page, content, tab]);
+
+  const tabBtn = (t: Tab, label: string): React.CSSProperties => ({
+    ...MONO,
+    fontSize: 11,
+    padding: '3px 10px',
+    cursor: 'pointer',
+    border: '1px solid var(--muted)',
+    borderRight: t === 'md' ? 'none' : '1px solid var(--muted)',
+    background: tab === t ? 'var(--accent)' : 'none',
+    color: tab === t ? 'var(--surface)' : 'var(--muted)',
+  });
 
   return (
     <div
@@ -75,7 +97,10 @@ export function ExportModal({ onClose }: Props) {
             flexShrink: 0,
           }}
         >
-          <span style={{ ...MONO, fontSize: 11, color: 'var(--muted)' }}>Export .md</span>
+          <div style={{ display: 'flex' }}>
+            <button style={tabBtn('md', '.md')} onClick={() => setTab('md')}>.md</button>
+            <button style={tabBtn('html', '.html')} onClick={() => setTab('html')}>.html</button>
+          </div>
           <button
             onClick={onClose}
             style={{
@@ -91,10 +116,10 @@ export function ExportModal({ onClose }: Props) {
           </button>
         </div>
 
-        {/* Markdown preview */}
+        {/* Preview */}
         <textarea
           readOnly
-          value={markdown}
+          value={content}
           style={{
             ...MONO,
             flex: 1,
@@ -147,7 +172,7 @@ export function ExportModal({ onClose }: Props) {
               cursor: 'pointer',
             }}
           >
-            Download .md
+            Download .{tab === 'md' ? 'md' : 'html'}
           </button>
         </div>
       </div>

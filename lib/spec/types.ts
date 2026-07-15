@@ -111,6 +111,7 @@ export interface CanvasConfig {
   height: number;
   grid: number;
   theme: ThemeName;
+  background?: string; // hex override; undefined = use var(--surface)
 }
 
 export interface PageConfig {
